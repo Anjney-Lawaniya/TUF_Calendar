@@ -63,23 +63,52 @@ function App() {
   const currBgRef = useRef(null);
   const prevBgRef = useRef(null);
   const calendarCardRef = useRef(null);
+  const containerRef = useRef(null);
   const prevDateRef = useRef(calState.currentDate);
+
+  const handleMouseMove = (e) => {
+    if (!containerRef.current || !calendarCardRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const xPercent = (x / rect.width - 0.5) * 2; 
+    const yPercent = (y / rect.height - 0.5) * 2;
+
+    gsap.to(calendarCardRef.current, {
+      rotateX: -yPercent * 10,
+      rotateY: xPercent * 10,
+      transformOrigin: "center center",
+      duration: 0.6,
+      ease: "power2.out"
+    });
+  };
+
+  const handleMouseLeave = () => {
+    if (!calendarCardRef.current) return;
+    gsap.to(calendarCardRef.current, {
+      rotateX: 0,
+      rotateY: 0,
+      duration: 1.2,
+      ease: "elastic.out(1, 0.4)"
+    });
+  };
 
   useEffect(() => {
     if (prevDateRef.current.getTime() !== calState.currentDate.getTime()) {
       const isNext = calState.currentDate > prevDateRef.current;
       gsap.fromTo(calendarCardRef.current,
         {
-           rotateY: isNext ? 90 : -90,
+           rotateY: isNext ? 30 : -30,
            transformOrigin: isNext ? "right center" : "left center",
-           opacity: 0.5,
+           opacity: 0.7,
            transformStyle: "preserve-3d"
         },
         {
            rotateY: 0,
            opacity: 1,
-           duration: 0.8,
-           ease: "back.out(1.1)"
+           duration: 1.2,
+           ease: "power3.out"
         }
       );
       prevDateRef.current = calState.currentDate;
@@ -135,7 +164,12 @@ function App() {
       </div>
       
       {/* Centered Glassmorphic App Core vertically stacked for scaling bounding boxes */}
-      <div className="w-full max-w-5xl max-h-[90vh] relative z-20 flex flex-col pt-0 transition-all duration-300 perspective-[2000px]">
+      <div 
+        ref={containerRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className="w-full max-w-5xl max-h-[90vh] relative z-20 flex flex-col pt-0 transition-all duration-700 ease-out hover:scale-[1.02] hover:-translate-y-3 perspective-[2000px] cursor-default"
+      >
         
         {/* Glassmorphic Calendar Body Constrained Frame */}
         <div 
